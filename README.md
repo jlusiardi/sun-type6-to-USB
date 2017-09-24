@@ -13,5 +13,7 @@ The protocol of the SUN Type 6 keyboards in based on 1200 baud serial with inver
 
 The communication with the keyboard is performed over a SoftwareSerial because this supports the inverted logic of the keyboard (see https://www.arduino.cc/en/Reference/SoftwareSerial for more details). 
 
+The keyboard's protocol is described in the "SPARC Keyboard Specification" (see https://sparc.org/wp-content/uploads/2014/01/KBD.pdf.gz).
+
 To control the USB communication (and the function as proper HID) I chose Nico Hood's HID project (see https://github.com/NicoHood/HID, commit 3c5000c4b606b85054150a201f0c6229a9148068) over Arduino's Keyboard functionality (https://www.arduino.cc/en/Reference/MouseKeyboard).
 
