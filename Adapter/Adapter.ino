@@ -3,8 +3,23 @@
 //https://github.com/NicoHood/HID
 #include "HID-Project.h"
 
+#define DEBUG
+
+#ifdef DEBUG
+#define DEBUG_PRINT(...) Serial.print(__VA_ARGS__)
+#define DEBUG_PRINTLN(...) Serial.println(__VA_ARGS__)
+#else
+#define DEBUG_PRINT(...)
+#define DEBUG_PRINTLN(...)
+#endif
+
 SoftwareSerial keyboard_in(14, 15, true); // RX, TX
 
+byte led_cmd[2] = { 0x0E, 0x00 };
+#define NUMLOCK 1
+#define COMPOSE 2
+#define SCROLLOCK 4
+#define CAPSLOCK 8
 
 #define down 0
 #define up 1
@@ -14,8 +29,8 @@ uint8_t data[] = {
   /*
    * 1st row
    */
-   //118,  down, KEY_HELP,
-  //246,  up,   KEY_HELP,
+  118,  down, KEY_HELP,
+  246,  up,   KEY_HELP,
   //15,   down, KEY_BLANK,
   //143,  up,   KEY_BLANK,
   5,    down, KEY_F1, //
@@ -60,8 +75,10 @@ uint8_t data[] = {
   /*
    * 2nd row
    */
-  // HELP
-  // Again
+  1,    down, KEY_STOP,   // Stop
+  81,   up,   KEY_STOP,
+  3,    down, KEY_AGAIN,  // Again
+  83,   up,   KEY_AGAIN,
   29,   down, KEY_ESC,
   157,  up,   KEY_ESC,
   30,   down, KEY_1,
@@ -86,8 +103,8 @@ uint8_t data[] = {
   167,  up,   KEY_0,
   40,   down, KEY_MINUS,
   168,  up,   KEY_MINUS,
-  41,   down, KEYPAD_EQUAL_SIGN,
-  169,  up,   KEYPAD_EQUAL_SIGN,
+  41,   down, KEY_EQUAL,
+  169,  up,   KEY_EQUAL,
   88,   down, KEY_BACKSLASH,
   216,  up,   KEY_BACKSLASH,
   42,   down, HID_KEYBOARD_GRAVE_ACCENT_AND_TILDE,
@@ -104,6 +121,10 @@ uint8_t data[] = {
   /*
    * 3rd row
    */
+  0x19, down, KEY_CRSEL_PROPS,
+  0x99, up,   KEY_CRSEL_PROPS,
+  0x1A, down, KEY_UNDO,
+  0x9A, up,   KEY_UNDO,
   53,   down, KEY_TAB,
   181,  up,   KEY_TAB,
   54,   down, KEY_Q,
@@ -142,8 +163,12 @@ uint8_t data[] = {
   /*
    * 4th row
    */
-  76,   down,  KEY_LEFT_CTRL,
-  204,  up,    KEY_LEFT_CTRL,
+  //0x31, down, //FRONT
+  //0xB1, up,
+  0x33, down, KEY_COPY,
+  0xB3, up,   KEY_COPY,
+  76,   down, KEY_LEFT_CTRL,
+  204,  up,   KEY_LEFT_CTRL,
   77,   down, KEY_A,
   205,  up,   KEY_A,
   78,   down, KEY_S,
@@ -172,6 +197,10 @@ uint8_t data[] = {
   /*
    * 5th row
    */
+  0x48, down, KEY_EXECUTE,
+  0xC8, up,   KEY_EXECUTE,
+  0x49, down, KEY_PASTE,
+  0xC9, up,   KEY_PASTE,
   99,   down, KEY_LEFT_SHIFT,
   227,  up,   KEY_LEFT_SHIFT,
   100,  down, KEY_Z,
@@ -202,6 +231,10 @@ uint8_t data[] = {
   /*
    * 6th row
    */
+  0x5F, down, KEY_FIND,
+  0xDF, up,   KEY_FIND,
+  0x61, down, KEY_CUT,
+  0xE1, up,   KEY_CUT,
   119,  down, KEY_CAPS_LOCK,
   247,  up,   KEY_CAPS_LOCK,
   19,   down, KEY_LEFT_ALT,
@@ -230,40 +263,77 @@ int data_len = sizeof(data) / 3;
 
 void setup() {
   // open the serial port:
-  Serial.begin(1200);
+  Serial.begin(115200);
   keyboard_in.begin(1200);
-  Keyboard.begin();
+  BootKeyboard.begin();
+
+  // Test if all LEDs are working
+  led_cmd[1] |= 0b00001111;
+  keyboard_in.write(led_cmd, 2);
+  delay(500);
+  led_cmd[1] = 0;
+  keyboard_in.write(led_cmd, 2);
 }
+
+uint8_t leds = 0;
 
 void loop() {
   // check for incoming serial data:
   if (keyboard_in.available() > 0) {
     uint8_t inChar = keyboard_in.read();
+    DEBUG_PRINT("Char: 0X");
+    DEBUG_PRINTLN(inChar, HEX);
 
-      int index;
-      for (index = 0; index < data_len; index++) {
-        if (inChar == data[index * 3]) {
-          uint8_t val = data[index * 3 + 2];
-          Serial.print("val: ");
-          Serial.println(val, HEX);
-          if (data[index * 3 + 1] == down) {
-            Serial.println("press");
-            Keyboard.press((KeyboardKeycode)val);
-          }
-          if (data[index * 3 + 1] == up) {
-            Serial.println("release");
-            Keyboard.release((KeyboardKeycode)val);
-          }
+    int index;
+    for (index = 0; index < data_len; index++) {
+      if (inChar == data[index * 3]) {
+        uint8_t val = data[index * 3 + 2];
+        if (data[index * 3 + 1] == down) {
+          DEBUG_PRINTLN("press");
+          BootKeyboard.press((KeyboardKeycode)val);
+        }
+        if (data[index * 3 + 1] == up) {
+          DEBUG_PRINTLN("release");
+          BootKeyboard.release((KeyboardKeycode)val);
         }
       }
-      if (inChar == 127) {
-        Keyboard.releaseAll();
-      }
+    }
+      // Power Button
+    if(inChar == 176) {
+      BootKeyboard.wakeupHost();
+    }
+    if (inChar == 127) {
+      BootKeyboard.releaseAll();
+    }
 
-    if (inChar == 0x40)
-      Serial.println();
-    else
-      Serial.println(inChar);
+  }
+
+  if (leds != BootKeyboard.getLeds()) {
+    leds = BootKeyboard.getLeds();
+    DEBUG_PRINT("LEDs: 0b");
+    DEBUG_PRINTLN(leds, BIN);
+
+   if (leds & LED_NUM_LOCK) {
+      led_cmd[1] |= NUMLOCK;
+    } else {
+      led_cmd[1] &= ~NUMLOCK;
+    }
+   if (leds & LED_CAPS_LOCK) {
+      led_cmd[1] |= CAPSLOCK;
+    } else {
+      led_cmd[1] &= ~CAPSLOCK;
+    }
+    if (leds & LED_SCROLL_LOCK) {
+      led_cmd[1] |= SCROLLOCK;
+    } else {
+      led_cmd[1] &= ~SCROLLOCK;
+    }
+    if (leds & LED_COMPOSE) {
+      led_cmd[1] |= COMPOSE;
+    } else {
+      led_cmd[1] &= ~COMPOSE;
+    }
+
+    keyboard_in.write(led_cmd, 2);
   }
 }
-
