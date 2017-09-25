@@ -117,6 +117,12 @@ uint8_t data[] = {
   224,  up,   KEY_PAGE_UP,
   98,   down, KEY_NUM_LOCK, //NUMLOC
   226,  up,   KEY_NUM_LOCK,
+  0x2E, down, KEYPAD_DIVIDE,
+  0xAE, up,   KEYPAD_DIVIDE,
+  0x2F, down, KEYPAD_MULTIPLY,
+  0xAF, up,   KEYPAD_MULTIPLY,
+  0x47, down, KEYPAD_SUBTRACT,
+  0xC7, up,   KEYPAD_SUBTRACT,
 
   /*
    * 3rd row
@@ -159,6 +165,14 @@ uint8_t data[] = {
   202,  up,   KEY_END,
   123,  down, KEY_PAGE_DOWN,
   251,  up,   KEY_PAGE_DOWN,
+  0x44, down, KEYPAD_7,
+  0xC4, up,   KEYPAD_7,
+  0x45, down, KEYPAD_8,
+  0xC5, up,   KEYPAD_8,
+  0x46, down, KEYPAD_9,
+  0xC6, up,   KEYPAD_9,
+  0x7D, down, KEYPAD_ADD,
+  0xFD, up,   KEYPAD_ADD,
 
   /*
    * 4th row
@@ -193,6 +207,12 @@ uint8_t data[] = {
   215,  up,   KEY_QUOTE,
   89,   down, KEY_RETURN,
   217,  up,   KEY_RETURN,
+  0x5B, down, KEYPAD_4,
+  0xDB, up,   KEYPAD_4,
+  0x5C, down, KEYPAD_5,
+  0xDC, up,   KEYPAD_5,
+  0x5D, down, KEYPAD_6,
+  0xDD, up,   KEYPAD_6,
 
   /*
    * 5th row
@@ -225,8 +245,16 @@ uint8_t data[] = {
   237,  up,   KEY_SLASH,
   110,  down, KEY_RIGHT_SHIFT,
   238,  up,   KEY_RIGHT_SHIFT,
-  20,   down,  KEY_UP_ARROW,
-  148,  up,    KEY_UP_ARROW,
+  20,   down, KEY_UP_ARROW,
+  148,  up,   KEY_UP_ARROW,
+  0x70, down, KEYPAD_1,
+  0xF0, up,   KEYPAD_1,
+  0x71, down, KEYPAD_2,
+  0xF1, up,   KEYPAD_2,
+  0x72, down, KEYPAD_3,
+  0xF2, up,   KEYPAD_3,
+  0x5A, down, KEYPAD_ENTER,
+  0xDA, up,   KEYPAD_ENTER, 
 
   /*
    * 6th row
@@ -245,8 +273,8 @@ uint8_t data[] = {
   249,  up,   KEY_SPACE,
   122,  down, KEY_RIGHT_GUI,
   250,  up,   KEY_RIGHT_GUI,
-  //67,   down, KEY_COMPOSE,
-  //195,  up,   KEY_COMPOSE,
+  0x43, down, KEY_APPLICATION,
+  0xC3, up,   KEY_APPLICATION,
   13,   down,  KEY_RIGHT_ALT,
   141,  up,    KEY_RIGHT_ALT,
   24,   down,  KEY_LEFT_ARROW,
@@ -255,8 +283,10 @@ uint8_t data[] = {
   155,  up,    KEY_DOWN_ARROW,
   28,   down,  KEY_RIGHT_ARROW,
   156,  up,    KEY_RIGHT_ARROW,
-  94,   down,  98, // KEY_NUMPAD_0
-  222,  up,    98,
+  0x5E, down,  KEYPAD_0, // KEY_NUMPAD_0
+  0xDE, up,    KEYPAD_0,
+  0x32, down,   KEYPAD_DOT,
+  0xB2, up,     KEYPAD_DOT,
 };
 
 int data_len = sizeof(data) / 3;
@@ -305,7 +335,6 @@ void loop() {
     if (inChar == 127) {
       BootKeyboard.releaseAll();
     }
-
   }
 
   if (leds != BootKeyboard.getLeds()) {
