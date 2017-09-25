@@ -1,13 +1,13 @@
 # sun-type6-to-USB
-This project is about building an adapter to bring a SUN Type 6 keyboard to modern computer via USB by using an arduiono micro.
+This project is about building an adaptor to bring a SUN Type 6 keyboard to modern computers via USB by using an arduino micro.
 
 ## schematic
 
-The protocol of the SUN Type 6 keyboards in based on 1200 baud serial with inverted logic. So connect:
+The protocol of the SUN Type 6 keyboards is based on 1200 baud serial with inverted logic. So connect:
  * the keyboards GND (right most pin of the internal connector) to some GND pin of the Arduino
  * the keyboards VCC (2nd pin from the right) to VCC on the Arduino (5V is fine)
  * the "to keyboard" line (4th from the right) goes to the TX pin of a SoftwareSerial (in the sketch it uses pin 15)
- * the "from keyboard" line (5th from the right) goes to the RX pin of a SoftwareSerial (in the sketch it uses pin 15)
+ * the "from keyboard" line (5th from the right) goes to the RX pin of a SoftwareSerial (in the sketch it uses pin 14)
  
 ## code 
 
