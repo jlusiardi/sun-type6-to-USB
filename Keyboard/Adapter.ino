@@ -15,6 +15,8 @@
 
 SoftwareSerial keyboard_in(14, 15, true); // RX, TX
 
+// mouse is on 10 or 16
+
 byte led_cmd[2] = { 0x0E, 0x00 };
 #define NUMLOCK 1
 #define COMPOSE 2
@@ -309,7 +311,7 @@ uint8_t leds = 0;
 
 void loop() {
   // check for incoming serial data:
-  if (keyboard_in.available() > 0) {
+  while (keyboard_in.available() > 0) {
     uint8_t inChar = keyboard_in.read();
     DEBUG_PRINT("Char: 0X");
     DEBUG_PRINTLN(inChar, HEX);
@@ -337,6 +339,7 @@ void loop() {
     }
   }
 
+  // handle leds
   if (leds != BootKeyboard.getLeds()) {
     leds = BootKeyboard.getLeds();
     DEBUG_PRINT("LEDs: 0b");
@@ -362,7 +365,6 @@ void loop() {
     } else {
       led_cmd[1] &= ~COMPOSE;
     }
-
     keyboard_in.write(led_cmd, 2);
   }
 }
